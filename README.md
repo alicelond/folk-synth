@@ -14,9 +14,109 @@ This implementation is strictly based on the following research:
 * Decay Stretching: Independent control over the sustain of notes using a stretch factor $S$, allowing for the simulation of different string materials and body sizes.
 * Pick Position Simulation: Uses a comb filter to mimic the timbral changes of plucking the string at different distances from the bridge.
 
+## 🚀 How to Use It
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/folk-synth.git
+   cd folk-synth
+   ```
+
+2. **Create and activate a Python virtual environment:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   Or manually install:
+   ```bash
+   pip install numpy pytest sounddevice soundfile
+   ```
+
+### Quick Start
+
+**Play a single note:**
+```python
+from core import play_note
+
+# Play A4 (440 Hz) for 1 second
+play_note(frequency=440, duration=1.0)
+```
+
+**Synthesize and save to file:**
+```python
+from core import save_note
+
+# Save a G3 note with soft pluck
+save_note(
+    'note.wav',
+    frequency=196,
+    duration=2.0,
+    pluck_intensity=0.3
+)
+```
+
+**Fine control over synthesis:**
+```python
+from core import KarplusStrong
+
+# Create synthesizer with custom parameters
+synth = KarplusStrong(
+    frequency=440,           # Note frequency in Hz
+    sample_rate=44100,       # Audio sample rate
+    duration=1.5,            # Duration in seconds
+    pluck_intensity=0.6,     # 0=soft (dark), 1=hard (bright)
+    pluck_position=0.5,      # 0=bridge (bright), 1=nut (dark)
+    decay_factor=0.99,       # 0.95-0.99 typical; higher=longer sustain
+    stretch_factor=1.2       # >1=longer sustain, <1=shorter sustain
+)
+
+# Generate audio samples (NumPy array)
+audio = synth.synthesize()
+
+# Play or export
+from core import AudioPlayer, AudioExporter
+player = AudioPlayer()
+player.play(audio)
+
+exporter = AudioExporter()
+exporter.save('custom_note.wav', audio)
+```
+
+### Running Tests
+
+Verify the implementation with the comprehensive test suite:
+```bash
+pytest tests/ -v              # Run all tests with verbose output
+pytest tests/test_string.py  # Run synthesizer tests only
+```
+
 ## 🎼 Project Roadmap
-- [x] Core Karplus-Strong Algorithm
-- [ ] Jaffe-Smith Allpass Filter for Fine Tuning
-- [ ] Dynamic Pluck Intensity Filter
-- [ ] Multi-string Strumming Sequencer (Folk Patterns)
-- [ ]  Web Interface for Real-time Synthesis
+
+### Phase 1: Core Synthesis Engine ✅ COMPLETE
+- [x] **Karplus-Strong Algorithm:** Basic plucked-string physical modelling with noise excitation and feedback loop
+- [x] **Jaffe-Smith Allpass Filter:** First-order allpass filters for fractional delay tuning, enabling precise pitch control beyond integer sample quantization
+- [x] **Dynamic Bandwidth Filtering:** Low-pass filter that responds to pluck intensity (soft plucks = darker tone, hard plucks = brighter tone)
+- [x] **Decay Stretching:** Independent control of sustain length via stretch factor $S$, decoupling brightness from sustain
+- [x] **Pick Position Simulation:** Comb filter based on pluck position to recreate timbral variations from different string locations
+- [x] **Real-time Playback:** Audio playback via `sounddevice` for immediate feedback
+- [x] **WAV Export:** File export with normalization and configurable parameters
+- [x] **Comprehensive Testing:** 101 unit + integration tests validating all components
+
+### Phase 2: Multi-Voice & Sequencing (Planned)
+- [ ] **Multi-string Synthesizer:** Simultaneous synthesis of multiple notes for chord generation
+- [ ] **Strumming Patterns:** Folk-style strumming sequencer with configurable timing and articulation
+- [ ] **MIDI Support:** Parse MIDI input for real-time note generation from external controllers
+- [ ] **Chord Builder:** Helper functions to easily generate common chord voicings
+
+### Phase 3: User Interface (Future)
+- [ ] **Web Interface:** Flask/Django-based UI for interactive synthesis and real-time parameter control
+- [ ] **Interactive Chord Input:** UI for selecting chords and voicings with visual feedback
+- [ ] **Recording & Playback:** Save/load synthesis sessions and export multi-track arrangements
+- [ ] **Audio Visualization:** Real-time waveform and spectrogram display
